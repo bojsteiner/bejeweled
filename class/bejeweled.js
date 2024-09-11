@@ -104,24 +104,26 @@ class Bejeweled {
     }
 
   fillDown() {
-    
-    for (let row = 0; row < this.grid.length; row++) {
-      for (let col = 0; col < this.grid[0].length; col++) {
-        if (this.grid[row][col] === ' ') {
-          let nextCharPosition = Bejeweled.findNextChar(this.grid, {row: row, col: col});
-          if(nextCharPosition) {
-            this.grid[row][col] = this.grid[nextCharPosition.row][nextCharPosition.col];
-            Screen.setGrid(row, col, this.grid[nextCharPosition.row][nextCharPosition.col])
-            this.grid[nextCharPosition.row][nextCharPosition.col] = ' ';
-            Screen.setGrid(nextCharPosition.row, nextCharPosition.col, ' ');
-            this.fillDown();
+    let falling = true;
+    while (falling) {
+      falling = false;
+      for (let row = 0; row < this.grid.length; row++) {
+        for (let col = 0; col < this.grid[0].length; col++) {
+          if (this.grid[row][col] === ' ') {
+            let nextCharPosition = Bejeweled.findNextChar(this.grid, {row: row, col: col});
+            if (nextCharPosition) {
+              this.grid[row][col] = this.grid[nextCharPosition.row][nextCharPosition.col];
+              Screen.setGrid(row, col, this.grid[nextCharPosition.row][nextCharPosition.col]);
+              this.grid[nextCharPosition.row][nextCharPosition.col] = ' ';
+              Screen.setGrid(nextCharPosition.row, nextCharPosition.col, ' ');
+              falling = true;
+            }
           }
-          }
-        } 
+        }
       }
-
-      Screen.render();
-  };
+    }
+    Screen.render();
+  }
 
   fillGaps() {
     const chars = 'ABCDEFGHIJ';
@@ -161,29 +163,45 @@ class Bejeweled {
 
   };
 
+  static isWithinBounds(grid, row, col) {
+    return row >= 0 && row < grid.length && col >= 0 && col < grid[0].length;
+  }
+
   static possibleMoves(grid) {
     for (let row = 0; row < grid.length; row++) {
-      for(let col = 0; col < grid[0].length; col++) {
+      for (let col = 0; col < grid[0].length; col++) {
         let current = grid[row][col];
-        //checks horizontal possible moves
+        
+        // Check horizontal possible moves
         if (col <= grid[0].length - 2) {
           let result = Bejeweled.checkSequence(grid, row, col, 0, 1, 2);
-          if(result) {
+          if (result) {
+            // Check adjacent moves
             if (
-              (col > 1 && current === grid[row][col - 2]) ||
-              (col < grid[0].length - 3 && current === grid[row][col + 3])
-             ) {
-              return true
-             }
+              Bejeweled.isWithinBounds(grid, row, col - 2) && current === grid[row][col - 2] || // left side
+              Bejeweled.isWithinBounds(grid, row, col + 3) && current === grid[row][col + 3] || // right side
+              Bejeweled.isWithinBounds(grid, row + 1, col + 2) && current === grid[row + 1][col + 2] || // diagonal right down
+              Bejeweled.isWithinBounds(grid, row - 1, col + 2) && current === grid[row - 1][col + 2] || // diagonal right up
+              Bejeweled.isWithinBounds(grid, row + 1, col - 1) && current === grid[row + 1][col - 1] || // diagonal left down
+              Bejeweled.isWithinBounds(grid, row - 1, col - 1) && current === grid[row - 1][col - 1]  // diagonal left up
+            ) {
+              return true;
+            }
           }
         }
-        //checks vertical possible moves
+  
+        // Check vertical possible moves
         if (row <= grid.length - 2) {
           let result = Bejeweled.checkSequence(grid, row, col, 1, 0, 2);
-          if(result) {
+          if (result) {
+            // Check adjacent moves
             if (
-              (row > 1 && current === grid[row - 2][col]) ||
-              (row < grid.length - 3 && current === grid[row + 3][col])
+              Bejeweled.isWithinBounds(grid, row - 2, col) && current === grid[row - 2][col] || // above
+              Bejeweled.isWithinBounds(grid, row + 3, col) && current === grid[row + 3][col] ||   // below
+              Bejeweled.isWithinBounds(grid, row - 1, col + 1) && current === grid[row - 1][col + 1] || // up right
+              Bejeweled.isWithinBounds(grid, row - 1, col - 1) && current === grid[row - 1][col - 1] || // up left
+              Bejeweled.isWithinBounds(grid, row + 2, col + 1) && current === grid[row + 2][col + 1] || // down right
+              Bejeweled.isWithinBounds(grid, row + 2, col - 1) && current === grid[row + 2][col - 1] // down left
             ) {
               return true;
             }
@@ -191,10 +209,8 @@ class Bejeweled {
         }
       }
     }
-
-    return false
-
-  };
+    return false;
+  }
 
   static selected = []
 
