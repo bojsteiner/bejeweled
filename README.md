@@ -1,3 +1,5 @@
+AppAcademy Open project outlined below. Original starter code that I worked from is here https://github.com/appacademy-starters/bejeweled-starter
+
 # Bejeweled
 
 In this project, you will create a command-line Bejeweled game. Unlike
